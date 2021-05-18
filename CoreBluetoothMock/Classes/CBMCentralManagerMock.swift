@@ -38,15 +38,16 @@ open class CBMCentralManagerMock: NSObject, CBMCentralManager {
     fileprivate static let rssiDeviation = 15 // dBm
     
     /// A list of all mock managers instantiated by user.
-    private static var managers: [WeakRef<CBMCentralManagerMock>] = []
+//    private static var managers: [WeakRef<CBMCentralManagerMock>] = []
+    private static let managers = NSHashTable<CBMCentralManagerMock>.weakObjects()
+    
     /// A list of peripherals known to the system.
     private static var peripherals: [CBMPeripheralSpec] = []
     /// The global state of the Bluetooth adapter on the device.
     fileprivate private(set) static var managerState: CBMManagerState = .poweredOff {
         didSet {
             // For all existing managers...
-            managers
-                .compactMap { $0.ref }
+            managers.allObjects
                 .forEach { manager in
                     // ...stop scanning if state changed to any other state
                     // than `.poweredOn`. Also, forget all peripherals.
@@ -63,7 +64,7 @@ open class CBMCentralManagerMock: NSObject, CBMCentralManager {
                     }
                 }
             // Compact the list, if any of managers were disposed.
-            managers.removeAll { $0.ref == nil }
+            managers.removeAllObjects()
         }
     }
     
@@ -87,7 +88,7 @@ open class CBMCentralManagerMock: NSObject, CBMCentralManager {
         // the list of managers.
         // Calling tearDownSimulation() will remove all managers
         // from that list, making them uninitialized again.
-        return CBMCentralManagerMock.managers.contains { $0.ref == self }
+        return CBMCentralManagerMock.managers.contains(self)
     }
     
     // MARK: - Initializers
@@ -144,7 +145,7 @@ open class CBMCentralManagerMock: NSObject, CBMCentralManager {
         // Let's say initialization takes 10 ms. Less or more.
         queue.asyncAfter(deadline: .now() + .milliseconds(10)) { [weak self] in
             if let self = self {
-                CBMCentralManagerMock.managers.append(WeakRef(self))
+                CBMCentralManagerMock.managers.add(self)
                 self.delegate?.centralManagerDidUpdateState(self)
             }
         }
@@ -160,7 +161,7 @@ open class CBMCentralManagerMock: NSObject, CBMCentralManager {
         // .unknown, which will make them invalid.
         managerState = .unknown
         // Remove all central manager instances.
-        managers.removeAll()
+        managers.removeAllObjects()
         // Set the manager state to powered Off.
         managerState = .poweredOff
         peripherals.removeAll()
@@ -188,7 +189,7 @@ open class CBMCentralManagerMock: NSObject, CBMCentralManager {
     /// will be overritten.
     /// - Parameter peripherals: Peripherals specifications.
     public static func simulatePeripherals(_ peripherals: [CBMPeripheralSpec]) {
-        guard managers.isEmpty || managerState == .poweredOff else {
+        guard managers.count == 0 || managerState == .poweredOff else {
             NSLog("Warning: Peripherals can not be added while the simulation is running. " +
                   "Add peripherals before getting any central manager instance, " +
                   "or when manager is powered off.")
@@ -258,7 +259,7 @@ open class CBMCentralManagerMock: NSObject, CBMCentralManager {
         guard peripheral.virtualConnections > 0 else {
             return
         }
-        let existingManagers = managers.compactMap { $0.ref }
+        let existingManagers = managers.allObjects
         existingManagers.forEach { manager in
             manager.peripherals[peripheral.identifier]?
                 .notifyServicesChanged()
@@ -292,8 +293,7 @@ open class CBMCentralManagerMock: NSObject, CBMCentralManager {
         guard peripheral.virtualConnections > 0 else {
             return
         }
-        managers
-            .compactMap { $0.ref }
+        managers.allObjects
             .forEach { manager in
                 manager.peripherals[peripheral.identifier]?
                     .notifyValueChanged(for: characteristic)
@@ -330,8 +330,7 @@ open class CBMCentralManagerMock: NSObject, CBMCentralManager {
         guard peripherals.contains(peripheral) else {
             return
         }
-        managers
-            .compactMap { $0.ref }
+        managers.allObjects
             .forEach { manager in
                 if let target = manager.peripherals[peripheral.identifier],
                    target.state == .connecting {
@@ -368,8 +367,7 @@ open class CBMCentralManagerMock: NSObject, CBMCentralManager {
         // immediately.
         peripheral.virtualConnections = 0
         // Notify all central managers.
-        managers
-            .compactMap { $0.ref }
+        managers.allObjects
             .forEach { manager in
                 if let target = manager.peripherals[peripheral.identifier],
                     target.state == .connected {
@@ -548,8 +546,8 @@ open class CBMCentralManagerMock: NSObject, CBMCentralManager {
         // copy them to the local manager.
         let peripheralsKnownByOtherManagers = missingIdentifiers
             .flatMap { i in
-                CBMCentralManagerMock.managers
-                    .compactMap { $0.ref?.peripherals[i] }
+                CBMCentralManagerMock.managers.allObjects
+                    .compactMap { $0.peripherals[i] }
             }
             .map { CBMPeripheralMock(copy: $0, by: self) }
         peripheralsKnownByOtherManagers.forEach {
@@ -573,12 +571,10 @@ open class CBMCentralManagerMock: NSObject, CBMCentralManager {
             .filter { $0.state == .connected }
         // Other central managers may know some connected peripherals that
         // are not known to the local one.
-        let peripheralsConnectedByOtherManagers = CBMCentralManagerMock.managers
-            // Get only those managers that were not disposed.
-            .filter { $0.ref != nil }
+        let peripheralsConnectedByOtherManagers = CBMCentralManagerMock.managers.allObjects
             // Look for connected peripherals known to other managers.
             .flatMap {
-                $0.ref!.peripherals[serviceUUIDs]
+                $0.peripherals[serviceUUIDs]
                     .filter { $0.state == .connected }
             }
             // Search for ones that are not known to the local manager.
