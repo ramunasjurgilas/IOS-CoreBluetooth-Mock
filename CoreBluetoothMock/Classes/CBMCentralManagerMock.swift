@@ -57,6 +57,7 @@ open class CBMCentralManagerMock: NSObject, CBMCentralManager {
                         manager.scanFilter = nil
                         manager.scanOptions = nil
                         manager.peripherals.values.forEach { $0.managerPoweredOff() }
+                        print("↗️ set state \(CBMCentralManagerMock.managers.allObjects) -> \(CBMCentralManagerMock.peripherals)")
                         manager.peripherals.removeAll()
                     }
                     // ...and notify delegate.
@@ -199,6 +200,7 @@ open class CBMCentralManagerMock: NSObject, CBMCentralManager {
             return
         }
         CBMCentralManagerMock.peripherals = peripherals
+        print("↗️ simulatePeripherals \(CBMCentralManagerMock.managers.allObjects) -> \(CBMCentralManagerMock.peripherals)")
     }
     
     /// Simulates turning the Bluetooth adapter on.
