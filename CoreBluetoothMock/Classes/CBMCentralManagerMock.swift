@@ -146,12 +146,12 @@ open class CBMCentralManagerMock: NSObject, CBMCentralManager {
                   "Call simulatePeripherals(:) before creating central manager")
         }
         // Let's say initialization takes 10 ms. Less or more.
-        queue.asyncAfter(deadline: .now() + .milliseconds(10)) { [weak self] in
-            if let self = self {
+        queue.asyncAfter(deadline: .now() + .milliseconds(10)) {
+//            if let self = self {
                 CBMCentralManagerMock.managers.add(self)
                 print("↗️ initialize \(CBMCentralManagerMock.managers.allObjects)")
                 self.delegate?.centralManagerDidUpdateState(self)
-            }
+//            }
         }
     }
     
