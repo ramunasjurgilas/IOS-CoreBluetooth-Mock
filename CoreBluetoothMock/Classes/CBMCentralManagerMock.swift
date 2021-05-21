@@ -63,8 +63,6 @@ open class CBMCentralManagerMock: NSObject, CBMCentralManager {
                         manager.delegate?.centralManagerDidUpdateState(manager)
                     }
                 }
-            // Compact the list, if any of managers were disposed.
-            managers.removeAllObjects()
         }
     }
     
