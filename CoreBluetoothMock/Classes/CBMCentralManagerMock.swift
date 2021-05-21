@@ -149,7 +149,6 @@ open class CBMCentralManagerMock: NSObject, CBMCentralManager {
         queue.asyncAfter(deadline: .now() + .milliseconds(10)) { [weak self] in
             if let self = self {
                 CBMCentralManagerMock.managers.add(self)
-                print("↗️ initialize \(CBMCentralManagerMock.managers.allObjects)")
                 self.delegate?.centralManagerDidUpdateState(self)
             }
         }
