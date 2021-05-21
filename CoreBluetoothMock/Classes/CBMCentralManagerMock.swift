@@ -42,7 +42,11 @@ open class CBMCentralManagerMock: NSObject, CBMCentralManager {
     private static let managers = NSHashTable<CBMCentralManagerMock>.weakObjects()
     
     /// A list of peripherals known to the system.
-    private static var peripherals: [CBMPeripheralSpec] = []
+    private static var peripherals: [CBMPeripheralSpec] = [] {
+        didSet {
+            print("↗️↗️ did set peripherals \(CBMCentralManagerMock.managers.allObjects) -> Periherals: \(CBMCentralManagerMock.peripherals.map { $0.identifier })")
+        }
+    }
     /// The global state of the Bluetooth adapter on the device.
     fileprivate private(set) static var managerState: CBMManagerState = .poweredOff {
         didSet {
@@ -57,7 +61,7 @@ open class CBMCentralManagerMock: NSObject, CBMCentralManager {
                         manager.scanFilter = nil
                         manager.scanOptions = nil
                         manager.peripherals.values.forEach { $0.managerPoweredOff() }
-                        print("↗️↗️ set state \(CBMCentralManagerMock.managers.allObjects) -> \(CBMCentralManagerMock.peripherals)")
+                        print("↗️↗️ set state \(CBMCentralManagerMock.managers.allObjects) -> Periherals: \(CBMCentralManagerMock.peripherals.map { $0.identifier })")
                         manager.peripherals.removeAll()
                     }
                     // ...and notify delegate.
@@ -200,7 +204,7 @@ open class CBMCentralManagerMock: NSObject, CBMCentralManager {
             return
         }
         CBMCentralManagerMock.peripherals = peripherals
-        print("↗️↗️ simulatePeripherals \(CBMCentralManagerMock.managers.allObjects) -> \(CBMCentralManagerMock.peripherals)")
+        print("↗️↗️ simulatePeripherals \(CBMCentralManagerMock.managers.allObjects) -> Periherals: \(CBMCentralManagerMock.peripherals.map { $0.identifier })")
     }
     
     /// Simulates turning the Bluetooth adapter on.
