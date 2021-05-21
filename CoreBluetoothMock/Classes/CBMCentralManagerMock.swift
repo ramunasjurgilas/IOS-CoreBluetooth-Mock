@@ -99,6 +99,9 @@ open class CBMCentralManagerMock: NSObject, CBMCentralManager {
         initialize()
     }
     
+    deinit {
+        print("↗️ deinit CBMCentralManagerMock")
+    }
     public required init(delegate: CBMCentralManagerDelegate?,
                          queue: DispatchQueue?) {
         self.isScanning = false
