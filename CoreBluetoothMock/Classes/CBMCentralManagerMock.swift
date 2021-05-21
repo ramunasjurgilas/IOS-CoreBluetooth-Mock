@@ -539,6 +539,8 @@ open class CBMCentralManagerMock: NSObject, CBMCentralManager {
         // Starting from iOS 13, this method returns peripherals only in ON state.
         guard ensurePoweredOn() else { return [] }
         // Get the peripherals already known to this central manager.
+        print("↗️ retrieve", peripherals, identifiers)
+        
         let localPeripherals = peripherals[identifiers]
         // If all were found, return them.
         if localPeripherals.count == identifiers.count {
