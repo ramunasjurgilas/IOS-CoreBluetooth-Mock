@@ -607,6 +607,7 @@ open class CBMCentralManagerMock: NSObject, CBMCentralManager {
     }
     
     fileprivate func ensurePoweredOn() -> Bool {
+        print("↗️ ensurePoweredOn \(CBMCentralManagerMock.managers.allObjects)")
         guard state == .poweredOn else {
             NSLog("[CoreBluetoothMock] API MISUSE: \(self) can only accept this command while in the powered on state")
             return false
