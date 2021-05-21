@@ -542,6 +542,9 @@ open class CBMCentralManagerMock: NSObject, CBMCentralManager {
         guard ensurePoweredOn() else { return [] }
         // Get the peripherals already known to this central manager.
         print("↗️ retrieve", peripherals, identifiers)
+        peripherals.forEach { dict in
+            print("↗️↗️", dict.key, dict.value)
+        }
         
         let localPeripherals = peripherals[identifiers]
         // If all were found, return them.
