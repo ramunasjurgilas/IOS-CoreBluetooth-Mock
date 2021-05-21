@@ -46,6 +46,7 @@ open class CBMCentralManagerMock: NSObject, CBMCentralManager {
     /// The global state of the Bluetooth adapter on the device.
     fileprivate private(set) static var managerState: CBMManagerState = .poweredOff {
         didSet {
+            print("↗️ update manger state \(managers.allObjects)")
             // For all existing managers...
             managers.allObjects
                 .forEach { manager in
