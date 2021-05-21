@@ -136,6 +136,7 @@ open class CBMCentralManagerMock: NSObject, CBMCentralManager {
     }
     
     private func initialize() {
+        print("↗️ init init init \(self) -> \(CBMCentralManagerMock.managers.allObjects)")
         if CBMCentralManagerMock.managerState == .poweredOn &&
            CBMCentralManagerMock.peripherals.isEmpty {
             NSLog("Warning: No simulated peripherals. " +
